@@ -209,8 +209,6 @@ def subs():
     driver = webdriver.Chrome(options=options)
     
     # SUBS 초화면 진입 (timeout 에 대비한 재시도 처리, 아직 검증안됐음)
-    # driver.get(url1)
-
     max_retries = 3
     for attempt in range(max_retries):
         try:
@@ -417,6 +415,13 @@ def subs():
 
     # Check if the current date is different from the last execution date
     if last_execution_date != current_date:
+        # Update the last execution date to the current date
+        last_execution_date = current_date
+        # Save the last execution date to a file
+        with open('last_execution.json', 'w') as file:
+            data = {'last_execution': str(last_execution_date)}
+            json.dump(data, file)
+
         # Perform the action that should be executed once a day
         printL("subs 게시판 리플 하루 한번만 수행되는 부분 실행")
         subs_count4 = subs_comment(url4)  # 마스터 subs 게시판 리플 달기
@@ -424,19 +429,11 @@ def subs():
         subs_count6 = subs_comment(url6)  # 유저 subs 게시판 리플 달기
         result_txt = f"{result_txt}\n Subs comment: ({subs_count4},{subs_count5},{subs_count6})개"
         printL(f"Subs comment: ({subs_count4},{subs_count5},{subs_count6})개")
-        
-        # Update the last execution date to the current date
-        last_execution_date = current_date
-
-        # Save the last execution date to a file
-        with open('last_execution.json', 'w') as file:
-            data = {'last_execution': str(last_execution_date)}
-            json.dump(data, file)
     else:
         # The action has already been executed today
-        printL("subs 게시판은 오늘 이미 한번 실행되었음. pass~")
+        printL("subs 게시판 리플달기는 오늘 이미 한번 실행되었음. pass~")
 
-    poll_count = poll_click(url7)  # 투표 subs 게시판 리플 달기
+    poll_count = poll_click(url7)  # 투표 게시판 투표하기
     result_txt = f"{result_txt}\n Poll : {poll_count}"
     printL(f"Poll : {poll_count}")
 
