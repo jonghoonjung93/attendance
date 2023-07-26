@@ -365,7 +365,14 @@ def subs():
         poll_success = 0
         for list_href in list_yesterday_href:
             printL(f"{list_href}") 
-            driver.get(list_href)
+            try:
+                driver.get(list_href)
+            except TimeoutException:
+                printL(f'TimeoutException 발생, continue...')
+                continue
+            except Exception as e:
+                printL(f'알수없는 에러 발생 : ({e})')
+                continue
             time.sleep(7)
             poll_txt = ""
             # radio 버튼 클릭
@@ -515,32 +522,40 @@ async def tele_push(content): #텔레그램 발송용 함수
     global_var = global_var + 1	# 보낸 메세지가 있으면 +1씩 올라감
 
 # ----------- MAIN ------------- 
-current_time = datetime.datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-start_time = current_time.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
-printL(f"-- START : {start_time}")
-printL(f"-- {mode_check()} MODE")
+flag = True
+if flag:    # 시작시간 처리
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    start_time = current_time.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
+    printL(f"-- START : {start_time}")
+    printL(f"-- {mode_check()} MODE")
 
 # inven 출석 실행
-attendance = inven()
-msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-printL(msg_content)
-asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+flag = True
+if flag:
+    attendance = inven()
+    msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
+    printL(msg_content)
+    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # subs 출석 실행
-attendance = subs()
-if attendance['txt'] != "ERROR":
-    msg_content2 = f"[SUBS] : {attendance['count1']},\n {attendance['txt']}"
-    printL(msg_content2)
-    asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
+flag = True
+if flag:
+    attendance = subs()
+    if attendance['txt'] != "ERROR":
+        msg_content2 = f"[SUBS] : {attendance['count1']},\n {attendance['txt']}"
+        printL(msg_content2)
+        asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	msg_content = " - att_auto : 메세지가 없음"
 	printL(msg_content)
 	asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
-current_time = datetime.datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-end_time = current_time.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
-printL(f"-- END : {end_time}")
-printL(f"-- Elapsed time : {end_time - start_time}")
+flag = True
+if flag:    # 종료시간 처리
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    end_time = current_time.strptime(formatted_time, "%Y-%m-%d %H:%M:%S")
+    printL(f"-- END : {end_time}")
+    printL(f"-- Elapsed time : {end_time - start_time}")
