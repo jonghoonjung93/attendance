@@ -350,7 +350,14 @@ def subs():
         yesterday = today - timedelta(days=1)
         yesterday_str_mmdd = yesterday.strftime("%m.%d")
         # 투표 게시판 이동
-        driver.get(poll_url)
+        try:
+            driver.get(poll_url)
+        except TimeoutException:
+            printL(f'poll 게시판 진입시 TimeoutException 발생, continue...')
+            return("poll failed (timeout)")
+        except Exception as e:
+            printL(f'poll 게시판 진입시 알수없는 에러 발생 : ({e})')
+            return("poll failed (error)")
         time.sleep(2)
         list_yesterday_href = []
         lists_poll = driver.find_element(By.CLASS_NAME, 'list-body').find_elements(By.CLASS_NAME, 'list-item')
