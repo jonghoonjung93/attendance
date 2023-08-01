@@ -352,6 +352,7 @@ def subs():
         # 투표 게시판 이동
         try:
             driver.get(poll_url)
+            printL("poll 게시판 접속성공")
         except TimeoutException:
             printL(f'poll 게시판 진입시 TimeoutException 발생, continue...')
             return("poll failed (timeout)")
