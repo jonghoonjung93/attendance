@@ -198,6 +198,7 @@ def subs():
     url5 = config['SITE2']['URL5']
     url6 = config['SITE2']['URL6']
     url7 = config['SITE2']['URL7']
+    url8 = config['SITE2']['URL8']
     user_id = config['SITE2']['ID']
     password = config['SITE2']['PASSWORD']
     reply = config['SITE2']['REPLY']
@@ -282,35 +283,41 @@ def subs():
     # print(levelmp)
     result_txt = f"{result_txt}\n {levelmp}"
 
-    # ---- 프리미엄 게시판 (조회 bot) ----
-    printL(f"프리미엄 게시판 시작... {url3}")
-    driver.get(url3)
-    time.sleep(3)
-
-    # 어제 날짜 mm.dd 로 만들기
-    today = datetime.datetime.now().date()
-    yesterday = today - timedelta(days=1)
-    yesterday_str = yesterday.strftime("%m.%d")
-
-    # 목록에서 어제자만 추출
-    list_yesterday_href = []
-    lists = driver.find_element(By.CLASS_NAME, 'list-body').find_elements(By.CLASS_NAME, 'list-item')
-    for list in lists:
-        list_date = list.find_element(By.CLASS_NAME, 'wr-date.hidden-xs').text
-        list_href = list.find_element(By.TAG_NAME, 'a').get_attribute('href')
-        if list_date == yesterday_str:  # 어제자 컨텐츠만 표시
-            list_yesterday_href.append(list_href)
-    
-    printL(f"읽기 목록 : {len(list_yesterday_href)}개")
-    
-    # 어제자 링크를 추출한 list 를 하나씩 조회 (어제자 없으면 그냥 넘어감)
-    for list2 in list_yesterday_href:
-        printL(f"{list2}")
-        driver.get(list2)
+    # ---- 게시판 (조회 bot) ----
+    def board_read(board, content):
+        printL(f"{content} 게시판 조회 시작... {board}")
+        driver.get(board)
         time.sleep(3)
+
+        # 어제 날짜 mm.dd 로 만들기
+        today = datetime.datetime.now().date()
+        yesterday = today - timedelta(days=1)
+        yesterday_str = yesterday.strftime("%m.%d")
+
+        # 목록에서 어제자만 추출
+        list_yesterday_href = []
+        lists = driver.find_element(By.CLASS_NAME, 'list-body').find_elements(By.CLASS_NAME, 'list-item')
+        for list in lists:
+            list_date = list.find_element(By.CLASS_NAME, 'wr-date.hidden-xs').text
+            list_href = list.find_element(By.TAG_NAME, 'a').get_attribute('href')
+            if list_date == yesterday_str:  # 어제자 컨텐츠만 표시
+                list_yesterday_href.append(list_href)
+        
+        printL(f"읽기 목록 : {len(list_yesterday_href)}개")
+        
+        # 어제자 링크를 추출한 list 를 하나씩 조회 (어제자 없으면 그냥 넘어감)
+        for list2 in list_yesterday_href:
+            printL(f"{list2}")
+            driver.get(list2)
+            time.sleep(3)
     
-    result_txt = f"{result_txt}\n Premium({yesterday_str}) : {str(len(list_yesterday_href))}개"
+        return_txt = f"Premium({yesterday_str}) : {str(len(list_yesterday_href))}개"
+        return(return_txt)
     
+    result_url3 = board_read(url3, "AI")    # AI 게시판 조회
+    result_txt = f"{result_txt}\n {result_url3}"    # AI 게시판 결과내용 추가
+    result_url8 = board_read(url8, "스포츠")    # 스포츠 게시판 조회
+    result_txt = f"{result_txt}\n {result_url8}"    # 스포츠 게시판 결과내용 추가
 
     #----- subs 게시판 (리플달기) -----#
     def subs_comment(subs_url):
