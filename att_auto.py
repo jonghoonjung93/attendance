@@ -311,7 +311,7 @@ def subs():
             driver.get(list2)
             time.sleep(3)
     
-        return_txt = f"Premium({yesterday_str}) : {str(len(list_yesterday_href))}개"
+        return_txt = f"{content}({yesterday_str}) : {str(len(list_yesterday_href))}개"
         return(return_txt)
     
     result_url3 = board_read(url3, "AI")    # AI 게시판 조회
