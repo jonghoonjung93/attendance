@@ -368,7 +368,11 @@ def subs():
             return("poll failed (error)")
         time.sleep(2)
         list_yesterday_href = []
-        lists_poll = driver.find_element(By.CLASS_NAME, 'list-body').find_elements(By.CLASS_NAME, 'list-item')
+        try:    # 여기서 에러난것 같음. 에러내용확인 처리 필요
+            lists_poll = driver.find_element(By.CLASS_NAME, 'list-body').find_elements(By.CLASS_NAME, 'list-item')
+        except Exception as e:
+            printL(f'poll 게시판 진입후 find_element 에서 에러 발생 : ({e})')
+            return("poll find_element fail (error)")
         for list_item in lists_poll:
             list_date = list_item.find_element(By.CLASS_NAME, 'wr-date.hidden-xs').text
             list_href = list_item.find_element(By.TAG_NAME, 'a').get_attribute('href')
