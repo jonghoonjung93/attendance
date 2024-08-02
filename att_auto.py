@@ -511,7 +511,7 @@ def solar():
     with open('config.json','r') as f:
         config = json.load(f)
     url1 = config['SOLAR']['URL1']
-    # url2 = config['SOLAR']['URL2']
+    url2 = config['SOLAR']['URL2']
     # user_id = config['SOLAR']['ID']
     # password = config['SOLAR']['PASSWORD']
     # ------------------------------------
@@ -545,11 +545,22 @@ def solar():
     # print(smp_data)
 
     time.sleep(2)
+    driver.get(url2)
+    action = ActionChains(driver)
+
+    time.sleep(1)
+    rec_data = driver.find_element(By.ID, 'tab-1').text
+    # print(rec_data)
+    # print(repr(rec_data))
+    # print(rec_data.replace('\n',' '))
+    rec = rec_data.replace('\n',' ')
+
     driver.quit()
 
     result_solar = {
         'smp_head': smp_head,
-        'smp_data': smp_data
+        'smp_data': smp_data,
+        'rec': rec
     }
     return(result_solar)
 
@@ -626,12 +637,12 @@ if flag:
         printL(msg_content2)
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
 
-# SMP 시세조회 실행
+# SMP,REC 시세조회 실행
 flag = True
 if flag:
     attendance = solar()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-    msg_content = f"[SOLAR] SMP : \n{attendance['smp_head']}\n{attendance['smp_data']}"
+    msg_content = f"[SOLAR] SMP : \n{attendance['smp_head']}\n{attendance['smp_data']}\nREC : \n{attendance['rec']}"
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
