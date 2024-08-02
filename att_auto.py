@@ -492,6 +492,66 @@ def subs():
 
     return(result_subs)
 
+def solar():
+    printL("-- solar value start")
+    options = Options()
+
+    # 운영모드 체크
+    if mode_check() == 'TEST':
+        # options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+        pass
+    else:
+        options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+                
+    # 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    # config.json 파일처리 ----------------
+    with open('config.json','r') as f:
+        config = json.load(f)
+    url1 = config['SOLAR']['URL1']
+    # url2 = config['SOLAR']['URL2']
+    # user_id = config['SOLAR']['ID']
+    # password = config['SOLAR']['PASSWORD']
+    # ------------------------------------
+    # print(user_id)
+    # print(password)
+    # print(url1)
+    # print(url2)
+    driver = webdriver.Chrome(options=options)
+    
+    # 전력거래소 사이트 SMP 조회화면 진입
+    driver.get(url1)
+    #driver.maximize_window()
+    action = ActionChains(driver)
+
+    time.sleep(1)
+    
+    smp_head = driver.find_element(By.XPATH, '//*[@id="contents_body"]/div[2]/div[2]/table/thead/tr').text
+    smp_data = driver.find_element(By.XPATH, '//*[@id="contents_body"]/div[2]/div[2]/table/tbody/tr[27]').text
+    
+    #----- (월) (화) 이런식으로 요일표시된거 지우기. 너무 길어서
+    import re
+    pattern = r'\(.*?\)'
+    cleaned_text = re.sub(pattern, '', smp_head)
+    cleaned_text = cleaned_text.strip()
+    #---------------------------------------------
+
+    smp_head = cleaned_text.replace('\n', '')
+    
+    # print(repr(smp_head)) #문자열안에 특수문자까지 다 볼때
+    # print(smp_head)
+    # print(smp_data)
+
+    time.sleep(2)
+    driver.quit()
+
+    result_solar = {
+        'smp_head': smp_head,
+        'smp_data': smp_data
+    }
+    return(result_solar)
 
 global_var = 0
 
@@ -565,6 +625,16 @@ if flag:
         msg_content2 = f"[SUBS] : {attendance['count1']},\n {attendance['txt']}"
         printL(msg_content2)
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
+
+# SMP 시세조회 실행
+flag = True
+if flag:
+    attendance = solar()
+    # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
+    msg_content = f"[SOLAR] SMP : \n{attendance['smp_head']}\n{attendance['smp_data']}"
+    printL(msg_content)
+    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+
 
 if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	msg_content = " - att_auto : 메세지가 없음"
