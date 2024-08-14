@@ -512,6 +512,8 @@ def solar():
         config = json.load(f)
     url1 = config['SOLAR']['URL1']
     url2 = config['SOLAR']['URL2']
+    rec3 = config['SOLAR']['REC3']
+    rec4 = config['SOLAR']['REC4']
     # user_id = config['SOLAR']['ID']
     # password = config['SOLAR']['PASSWORD']
     # ------------------------------------
@@ -550,17 +552,49 @@ def solar():
 
     time.sleep(1)
     rec_data = driver.find_element(By.ID, 'tab-1').text
-    # print(rec_data)
-    # print(repr(rec_data))
-    # print(rec_data.replace('\n',' '))
     rec = rec_data.replace('\n',' ')
+
+    # print(f'rec_data = {rec_data}')
+    # print(f'rec = {rec}')
+
+    def get_last_word(s):   # 마지막 문자열만 return 해주는 함수
+        # Split the string into words
+        words = s.split()
+        # Return the last word if the list is not empty
+        return words[-1] if words else ""
+    
+    rec_avg = get_last_word(rec)
+    # print(f'rec_avg = {rec_avg}')
+
+    # print(type(rec3))
+    # print(type(rec_avg))
+
+    rec_avg_cleaned = rec_avg.replace(",", "")  # rec_avg 값에 ,제거 (int 변환시 에러방지)
+
+    rec3_value = int(rec3) * int(rec_avg_cleaned)
+    rec4_value = int(rec4) * int(rec_avg_cleaned)
+    rec_total = rec3_value + rec4_value
+
+    rec3_value_comma = format(rec3_value, ",")  # 금액처럼 3자리수마다 ,찍기
+    rec4_value_comma = format(rec4_value, ",")
+    rec_total_comma = format(rec_total, ",")
+
+    # print(f'rec3 = {rec3}개, {rec3_value_comma}원')
+    # print(f'rec4 = {rec4}개, {rec4_value_comma}원')
+
+    # time.sleep(10000)
 
     driver.quit()
 
     result_solar = {
         'smp_head': smp_head,
         'smp_data': smp_data,
-        'rec': rec
+        'rec': rec,
+        'rec3': rec3,
+        'rec4': rec4,
+        'rec3_value': rec3_value_comma,
+        'rec4_value': rec4_value_comma,
+        'rec_total': rec_total_comma
     }
     return(result_solar)
 
@@ -642,7 +676,7 @@ flag = True
 if flag:
     attendance = solar()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-    msg_content = f"[SOLAR] SMP : \n{attendance['smp_head']}\n{attendance['smp_data']}\nREC : \n{attendance['rec']}"
+    msg_content = f"[SOLAR] SMP 시세: \n - {attendance['smp_head']}\n - {attendance['smp_data']}\nREC 시세: \n - {attendance['rec']}\n - REC3 :{attendance['rec3']}개, {attendance['rec3_value']}원 \n - REC4 :{attendance['rec4']}개, {attendance['rec4_value']}원\n - Total : {attendance['rec_total']}원"
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
