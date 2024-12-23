@@ -598,6 +598,52 @@ def solar():
     }
     return(result_solar)
 
+def aliexpress():
+    printL("-- aliexpress coin start")
+    options = Options()
+
+    # 운영모드 체크
+    if mode_check() == 'TEST':
+        # options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+        pass
+    else:
+        options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+                
+    # 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    # config.json 파일처리 ----------------
+    with open('config.json','r') as f:
+        config = json.load(f)
+    url1 = config['ALI']['URL1']
+    user_id = config['ALI']['ID']
+    password = config['ALI']['PASSWORD']
+    # ------------------------------------
+    print(user_id)
+    print(password)
+    print(url1)
+    driver = webdriver.Chrome(options=options)
+
+    # aliexpress coin 화면 진입
+    driver.get(url1)
+    #driver.maximize_window()
+    action = ActionChains(driver)
+
+    time.sleep(1)
+
+    # ID 입력하고 로그인 버튼 클릭
+    driver.find_element(By.CLASS_NAME, "cosmos-input").send_keys(user_id)
+    driver.find_element(By.CLASS_NAME, "cosmos-input").send_keys(Keys.ENTER)
+    time.sleep(2)
+    # time.sleep(1000)
+    driver.find_element(By.NAME, "fm-login-password").send_keys(password)
+    driver.find_element(By.NAME, "fm-login-password").send_keys(Keys.ENTER)
+    
+    # 여기까지 했는데 로그인 할때 슬라이드 해야되는게 나오서 STOP
+    pass
+
+
 global_var = 0
 
 # telegram 메세지 발송함수
@@ -680,6 +726,14 @@ if flag:
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
+# ALIEXPRESS COIN 출석체크 실행
+flag = False
+if flag:
+    attendance = aliexpress()
+    # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
+    msg_content = f"[ALI] SMP 시세: \n - {attendance['smp_head']}\n - {attendance['smp_data']}\nREC 시세: \n - {attendance['rec']}\n - REC3 :{attendance['rec3']}개, {attendance['rec3_value']}원 \n - REC4 :{attendance['rec4']}개, {attendance['rec4_value']}원\n - Total : {attendance['rec_total']}원"
+    printL(msg_content)
+    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	msg_content = " - att_auto : 메세지가 없음"
