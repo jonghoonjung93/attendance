@@ -643,6 +643,112 @@ def aliexpress():
     # 여기까지 했는데 로그인 할때 슬라이드 해야되는게 나오서 STOP
     pass
 
+def stock_check():
+    printL("-- stock check start")
+    options = Options()
+
+    # 운영모드 체크
+    if mode_check() == 'TEST':
+        # options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+        pass
+    else:
+        options.add_argument("headless") #크롬창이 뜨지 않고 백그라운드로 동작됨
+                
+    # 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    
+    # config.json 파일처리 ----------------
+    with open('config.json','r') as f:
+        config = json.load(f)
+    url1 = config['STOCK_TSLA']['URL1']
+    url2 = config['STOCK_TSLA']['URL2']
+    jh_cnt = config['STOCK_TSLA']['JH']
+    yn_cnt = config['STOCK_TSLA']['YN']
+    yh_cnt = config['STOCK_TSLA']['YH']
+    yj_cnt = config['STOCK_TSLA']['YJ']
+    sh_cnt = config['STOCK_TSLA']['SH']
+    # ------------------------------------
+    # print(url1)
+    # print(jh_cnt)
+    # print(yn_cnt)
+    # print(yh_cnt)
+    # print(yj_cnt)
+    # print(sh_cnt)
+    driver = webdriver.Chrome(options=options)
+
+    # 네이버 주식 TSLA 주가 조회
+    driver.get(url1)
+    #driver.maximize_window()
+    action = ActionChains(driver)
+
+    time.sleep(1)
+
+    tsla_value = driver.find_element(By.CLASS_NAME, "GraphMain_price__H72B2").text.replace("\nUSD", "")
+    tsla_pct = driver.find_elements(By.CLASS_NAME, "VGap_gap__LQYpL")[1].text
+    # print(tsla_value)
+    # print(tsla_pct)
+
+    # time.sleep(2)
+
+    # 총 주식수 계산
+    total_cnt = int(jh_cnt) + int(yn_cnt) + int(yh_cnt) + int(yj_cnt) + int(sh_cnt)
+
+    # KRW 환율 조회
+    driver.get(url2)
+    action = ActionChains(driver)
+    usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
+    # print(usd_krw)
+
+    # JH
+    result_jh = int(int(jh_cnt) * float(tsla_value) * float(usd_krw))
+    jh_krw = format(result_jh, ',')
+    # print(jh_krw)
+
+    # YN
+    result_yn = int(int(yn_cnt) * float(tsla_value) * float(usd_krw))
+    yn_krw = format(result_yn, ',')
+    # print(yn_krw)
+
+    # YH
+    result_yh = int(int(yh_cnt) * float(tsla_value) * float(usd_krw))
+    yh_krw = format(result_yh, ',')
+    # print(yh_krw)
+
+    # YJ
+    result_yj = int(int(yj_cnt) * float(tsla_value) * float(usd_krw))
+    yj_krw = format(result_yj, ',')
+    # print(yj_krw)
+
+    # SH
+    result_sh = int(int(sh_cnt) * float(tsla_value) * float(usd_krw))
+    sh_krw = format(result_sh, ',')
+    # print(sh_krw)
+
+    # TOTAL
+    result_total = result_jh + result_yn + result_yh + result_yj + result_sh
+    total_krw = format(result_total, ',')
+
+    driver.quit()
+
+    result_stock = {
+        'tsla_value': tsla_value,
+        'tsla_pct': tsla_pct,
+        'usd_krw': usd_krw,
+        'jh_cnt': jh_cnt,
+        'yn_cnt': yn_cnt,
+        'yh_cnt': yh_cnt,
+        'yj_cnt': yj_cnt,
+        'sh_cnt': sh_cnt,
+        'jh_krw': jh_krw,
+        'yn_krw': yn_krw,
+        'yh_krw': yh_krw,
+        'yj_krw': yj_krw,
+        'sh_krw': sh_krw,
+        'total_krw' : total_krw,
+        'total_cnt' : total_cnt
+    }
+    return(result_stock)
 
 global_var = 0
 
@@ -726,12 +832,21 @@ if flag:
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
-# ALIEXPRESS COIN 출석체크 실행
-flag = False
+# ALIEXPRESS COIN 출석체크 실행 (로그인 DRAG에 막힘)
+flag = False    # False 유지
 if flag:
     attendance = aliexpress()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
     msg_content = f"[ALI] SMP 시세: \n - {attendance['smp_head']}\n - {attendance['smp_data']}\nREC 시세: \n - {attendance['rec']}\n - REC3 :{attendance['rec3']}개, {attendance['rec3_value']}원 \n - REC4 :{attendance['rec4']}개, {attendance['rec4_value']}원\n - Total : {attendance['rec_total']}원"
+    printL(msg_content)
+    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+
+# 주가,수량,수익 일일체크
+flag = True
+if flag:
+    attendance = stock_check()
+    # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
+    msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']})"
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
