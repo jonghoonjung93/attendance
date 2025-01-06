@@ -731,6 +731,50 @@ def stock_check():
 
     driver.quit()
 
+    # STOCK History DB 저장기능
+    flag = True
+    if flag:
+        import sqlite3
+
+        current_time = datetime.datetime.now()
+        # formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+        formatted_date = current_time.strftime("%Y%m%d")
+        # formatted_month = current_time.strftime("%Y%m")
+
+        daily_chg = 0
+        # DB insert 처리
+        try:
+            conn = sqlite3.connect('stock.sqlite3')
+            cursor = conn.cursor()
+
+            def query_database(query):
+                cursor.execute(query)
+                result = cursor.fetchall()
+                return result
+            query = f'SELECT max(date), total_krw from stock_history where user = "TOTAL"'
+            try:
+                YESTER_TOTAL_KRW = query_database(query)[0][1]
+                # print(result_total, YESTER_TOTAL_KRW)
+            except:
+                YESTER_TOTAL_KRW = 0
+
+            daily_chg = format(result_total - int(YESTER_TOTAL_KRW), ',')
+            # print(daily_chg)
+
+            data_list1 = [
+                (formatted_date, 'TSLA', 'JH', int(jh_cnt), float(usd_krw), result_jh),
+                (formatted_date, 'TSLA', 'YN', int(yn_cnt), float(usd_krw), result_yn),
+                (formatted_date, 'TSLA', 'YH', int(yh_cnt), float(usd_krw), result_yh),
+                (formatted_date, 'TSLA', 'YJ', int(yj_cnt), float(usd_krw), result_yj),
+                (formatted_date, 'TSLA', 'SH', int(sh_cnt), float(usd_krw), result_sh),
+                (formatted_date, 'TSLA', 'TOTAL', total_cnt, float(usd_krw), result_total)
+            ]
+            cursor.executemany("INSERT OR REPLACE INTO stock_history (date, ticker, user, stock_cnt, usd_krw, total_krw) VALUES (?,?,?,?,?,?);", data_list1)
+    
+            conn.commit()
+        finally:
+            conn.close()
+
     result_stock = {
         'tsla_value': tsla_value,
         'tsla_pct': tsla_pct,
@@ -746,7 +790,8 @@ def stock_check():
         'yj_krw': yj_krw,
         'sh_krw': sh_krw,
         'total_krw' : total_krw,
-        'total_cnt' : total_cnt
+        'total_cnt' : total_cnt,
+        'daily_chg' : daily_chg
     }
     return(result_stock)
 
@@ -846,7 +891,7 @@ flag = True
 if flag:
     attendance = stock_check()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-    msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']})"
+    msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
