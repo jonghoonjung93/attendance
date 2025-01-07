@@ -682,7 +682,7 @@ def stock_check():
     #driver.maximize_window()
     action = ActionChains(driver)
 
-    time.sleep(5)
+    time.sleep(2)
 
     tsla_value = driver.find_element(By.CLASS_NAME, "GraphMain_price__H72B2").text.replace("\nUSD", "")
     tsla_pct = driver.find_elements(By.CLASS_NAME, "VGap_gap__LQYpL")[1].text
@@ -698,7 +698,7 @@ def stock_check():
     driver.get(url2)
     action = ActionChains(driver)
 
-    time.sleep(5)
+    time.sleep(2)
 
     usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
     # print(usd_krw)
@@ -754,7 +754,7 @@ def stock_check():
                 cursor.execute(query)
                 result = cursor.fetchall()
                 return result
-            query = f'SELECT max(date), total_krw from stock_history where user = "TOTAL"'
+            query = f'SELECT max(date), total_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
             try:
                 YESTER_TOTAL_KRW = query_database(query)[0][1]
                 # print(result_total, YESTER_TOTAL_KRW)
@@ -779,6 +779,8 @@ def stock_check():
             conn.close()
 
     result_stock = {
+        'url1' : url1,
+        'url2' : url2,
         'tsla_value': tsla_value,
         'tsla_pct': tsla_pct,
         'usd_krw': usd_krw,
@@ -827,7 +829,8 @@ async def tele_push(content): #텔레그램 발송용 함수
         while True:	# 텔레그램 발송이 혹시 실패하면 최대 3회까지 성공할때까지 재시도
             try:
                 # await bot.send_message(chat_id, formatted_time + "\n" + content, parse_mode = 'Markdown', disable_web_page_preview=True)
-                await bot.send_message(chat_id, formatted_time + "\n" + content)
+                # await bot.send_message(chat_id, formatted_time + "\n" + content)
+                await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
                 printL(f"-- SEND success!!! : {chat_id}")
                 break
             except:
@@ -900,8 +903,10 @@ if flag:
     # 일요일(6)이나 월요일(0)이 아닐 때 로직 수행
     if today not in (0, 6):
         attendance = stock_check()
+        link1 = attendance['url1']
+        link2 = attendance['url2']
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nUSDKRW : {attendance['usd_krw']} \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']}]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
