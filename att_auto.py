@@ -828,9 +828,10 @@ async def tele_push(content): #텔레그램 발송용 함수
         send_retry = 0
         while True:	# 텔레그램 발송이 혹시 실패하면 최대 3회까지 성공할때까지 재시도
             try:
-                # await bot.send_message(chat_id, formatted_time + "\n" + content, parse_mode = 'Markdown', disable_web_page_preview=True)
-                # await bot.send_message(chat_id, formatted_time + "\n" + content)
-                await bot.send_message(chat_id, content, parse_mode = 'Markdown', disable_web_page_preview=True)
+                if "STOCK" in content:  # STOCK 의 경우에만 Markdown 을 사용함
+                    await bot.send_message(chat_id, formatted_time + "\n" + content, parse_mode = 'Markdown', disable_web_page_preview=True)
+                else:
+                    await bot.send_message(chat_id, formatted_time + "\n" + content)
                 printL(f"-- SEND success!!! : {chat_id}")
                 break
             except:
@@ -906,7 +907,7 @@ if flag:
         link1 = attendance['url1']
         link2 = attendance['url2']
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']}]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"\[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']}]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
