@@ -682,7 +682,7 @@ def stock_check():
     #driver.maximize_window()
     action = ActionChains(driver)
 
-    time.sleep(1)
+    time.sleep(5)
 
     tsla_value = driver.find_element(By.CLASS_NAME, "GraphMain_price__H72B2").text.replace("\nUSD", "")
     tsla_pct = driver.find_elements(By.CLASS_NAME, "VGap_gap__LQYpL")[1].text
@@ -697,6 +697,9 @@ def stock_check():
     # KRW 환율 조회
     driver.get(url2)
     action = ActionChains(driver)
+
+    time.sleep(5)
+
     usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
     # print(usd_krw)
 
@@ -852,7 +855,7 @@ if flag:    # 시작시간 처리
     printL(f"-- {mode_check()} MODE")
 
 # inven 출석 실행
-flag = True
+flag = False
 if flag:
     attendance = inven()
     msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
@@ -860,7 +863,7 @@ if flag:
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # subs 출석 실행
-flag = True
+flag = False
 if flag:
     attendance = subs()
     if attendance['txt'] != "ERROR":
@@ -869,7 +872,7 @@ if flag:
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # SMP,REC 시세조회 실행
-flag = True
+flag = False
 if flag:
     attendance = solar()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
@@ -889,16 +892,16 @@ if flag:
 # 주가,수량,수익 일일체크
 flag = True
 if flag:
-    from datetime import datetime
+    # from datetime import datetime
 
     # 오늘의 요일을 숫자로 가져옴 (월요일=0, 일요일=6)
-    today = datetime.today().weekday()
+    today = datetime.datetime.today().weekday()
 
     # 일요일(6)이나 월요일(0)이 아닐 때 로직 수행
     if today not in (0, 6):
         attendance = stock_check()
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"[STOCK] TLSA: {attendance['tsla_value']} ({attendance['tsla_pct']}) \nUSDKRW : {attendance['usd_krw']} \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
