@@ -855,7 +855,7 @@ if flag:    # 시작시간 처리
     printL(f"-- {mode_check()} MODE")
 
 # inven 출석 실행
-flag = False
+flag = True
 if flag:
     attendance = inven()
     msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
@@ -863,7 +863,7 @@ if flag:
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # subs 출석 실행
-flag = False
+flag = True
 if flag:
     attendance = subs()
     if attendance['txt'] != "ERROR":
@@ -872,7 +872,7 @@ if flag:
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # SMP,REC 시세조회 실행
-flag = False
+flag = True
 if flag:
     attendance = solar()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
