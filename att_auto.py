@@ -754,15 +754,22 @@ def stock_check():
                 cursor.execute(query)
                 result = cursor.fetchall()
                 return result
-            query = f'SELECT max(date), total_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
+            # 어제자(또는 가장 최근일) TOTAL 금액조회
+            query1 = f'SELECT max(date), total_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
+            # 어제자(또는 가장 최근일) 환율 조회
+            query2 = f'SELECT max(date), usd_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
             try:
-                YESTER_TOTAL_KRW = query_database(query)[0][1]
+                YESTER_TOTAL_KRW = query_database(query1)[0][1]
                 # print(result_total, YESTER_TOTAL_KRW)
+                YESTER_USD_KRW = query_database(query2)[0][1]
             except:
                 YESTER_TOTAL_KRW = 0
+                YESTER_USD_KRW = 0
 
             daily_chg = format(result_total - int(YESTER_TOTAL_KRW), ',')
             # print(daily_chg)
+            daily_chg_hwan = "{:.1f}".format(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
+            # print(daily_chg_hwan)
 
             data_list1 = [
                 (formatted_date, 'TSLA', 'JH', int(jh_cnt), float(usd_krw), result_jh),
@@ -796,7 +803,8 @@ def stock_check():
         'sh_krw': sh_krw,
         'total_krw' : total_krw,
         'total_cnt' : total_cnt,
-        'daily_chg' : daily_chg
+        'daily_chg' : daily_chg,
+        'daily_chg_hwan' : daily_chg_hwan
     }
     return(result_stock)
 
@@ -907,7 +915,7 @@ if flag:
         link1 = attendance['url1']
         link2 = attendance['url2']
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"\[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']}]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"\[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']}%)]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
