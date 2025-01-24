@@ -768,8 +768,21 @@ def stock_check():
 
             daily_chg = format(result_total - int(YESTER_TOTAL_KRW), ',')
             # print(daily_chg)
-            daily_chg_hwan = "{:.1f}".format(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
-            # print(daily_chg_hwan)
+            daily_chg_hwan = "{:.2f}".format(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
+
+            # DEBUG Start
+            printL(float(usd_krw))
+            printL(float(YESTER_USD_KRW))
+            printL(float(usd_krw) - float(YESTER_USD_KRW))
+            printL(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
+            printL(daily_chg_hwan)
+            # DEBUG End
+
+            if float(daily_chg_hwan) > 0:   # 일일 환율변동 %값이 양수면 + 붙여주기
+                daily_chg_hwan = f"+{daily_chg_hwan}%"
+            else:
+                daily_chg_hwan = f"{daily_chg_hwan}%"
+            printL(daily_chg_hwan)
 
             data_list1 = [
                 (formatted_date, 'TSLA', 'JH', int(jh_cnt), float(usd_krw), result_jh),
@@ -790,7 +803,7 @@ def stock_check():
         'url2' : url2,
         'tsla_value': tsla_value,
         'tsla_pct': tsla_pct,
-        'usd_krw': usd_krw,
+        'usd_krw': "{:.6s}".format(usd_krw),
         'jh_cnt': jh_cnt,
         'yn_cnt': yn_cnt,
         'yh_cnt': yh_cnt,
@@ -867,7 +880,7 @@ if flag:    # 시작시간 처리
     printL(f"-- {mode_check()} MODE")
 
 # inven 출석 실행
-flag = True
+flag = False
 if flag:
     attendance = inven()
     msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
@@ -875,7 +888,7 @@ if flag:
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # subs 출석 실행
-flag = True
+flag = False
 if flag:
     attendance = subs()
     if attendance['txt'] != "ERROR":
@@ -884,7 +897,7 @@ if flag:
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
 
 # SMP,REC 시세조회 실행
-flag = True
+flag = False
 if flag:
     attendance = solar()
     # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
@@ -915,7 +928,7 @@ if flag:
         link1 = attendance['url1']
         link2 = attendance['url2']
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"\[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']}%)]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"\[STOCK] TLSA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']})]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
