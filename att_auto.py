@@ -784,6 +784,12 @@ def stock_check():
                 daily_chg_hwan = f"{daily_chg_hwan}%"
             printL(daily_chg_hwan)
 
+            if float(daily_chg.replace(",", "")) > 0:   # 일일변동금액 %값이 양수면 + 붙여주기
+                daily_chg = f"+{daily_chg}%"
+            else:
+                daily_chg = f"{daily_chg}%"
+            printL(daily_chg)
+
             data_list1 = [
                 (formatted_date, 'TSLA', 'JH', int(jh_cnt), float(usd_krw), result_jh),
                 (formatted_date, 'TSLA', 'YN', int(yn_cnt), float(usd_krw), result_yn),
