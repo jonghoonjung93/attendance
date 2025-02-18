@@ -700,8 +700,16 @@ def stock_check():
 
     time.sleep(2)
 
-    usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
-    # print(usd_krw)
+    # time.sleep(10000)
+    # usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
+    # 위의 구문은 CLASS_NAME 이 자꾸 바뀌는 문제로 아래문장으로 변경처리
+    try:
+        usd_krw = driver.find_element(By.CSS_SELECTOR, "[class^='DetailInfo_price__I']").text.replace("\nKRW", "").replace(",","")
+        # print(usd_krw)
+    except:
+        usd_krw = "1440.44"
+        # print("usd_krw fail")
+    print(usd_krw)
 
     # JH
     result_jh = int(int(jh_cnt) * float(tsla_value) * float(usd_krw))
@@ -785,9 +793,9 @@ def stock_check():
             printL(daily_chg_hwan)
 
             if float(daily_chg.replace(",", "")) > 0:   # 일일변동금액 %값이 양수면 + 붙여주기
-                daily_chg = f"+{daily_chg}%"
+                daily_chg = f"+{daily_chg}"
             else:
-                daily_chg = f"{daily_chg}%"
+                daily_chg = f"{daily_chg}"
             printL(daily_chg)
 
             data_list1 = [
