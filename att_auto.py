@@ -663,6 +663,7 @@ def stock_check():
         config = json.load(f)
     url1 = config['STOCK_TSLA']['URL1']
     url2 = config['STOCK_TSLA']['URL2']
+    url3 = config['STOCK_TSLA']['URL3']
     jh_cnt = config['STOCK_TSLA']['JH']
     yn_cnt = config['STOCK_TSLA']['YN']
     yh_cnt = config['STOCK_TSLA']['YH']
@@ -815,6 +816,7 @@ def stock_check():
     result_stock = {
         'url1' : url1,
         'url2' : url2,
+        'url3' : url3,
         'tsla_value': tsla_value,
         'tsla_pct': tsla_pct,
         'usd_krw': "{:.6s}".format(usd_krw),
@@ -941,8 +943,9 @@ if flag:
         attendance = stock_check()
         link1 = attendance['url1']
         link2 = attendance['url2']
+        link3 = attendance['url3']
         # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-        msg_content = f"\[STOCK] TSLA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']})]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
+        msg_content = f"\[[STOCK]({link3})] TSLA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']})]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
