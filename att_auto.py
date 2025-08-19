@@ -35,7 +35,8 @@ html = driver.page_source   # 이후 Beautifulsoup을 이용해서 속도를 빠
 
 def mode_check():
 	hostname = socket.gethostname()
-	if hostname == 'jungui-MacBookAir.local':
+	# if hostname == 'jungui-MacBookAir.local':
+	if 'local' in hostname.lower(): # jungui-MacBookAir.local, Mac-mini.local
 		MODE = "TEST"
 	else:
 		MODE = "ONLINE"
@@ -664,6 +665,7 @@ def stock_check():
     url1 = config['STOCK_TSLA']['URL1']
     url2 = config['STOCK_TSLA']['URL2']
     url3 = config['STOCK_TSLA']['URL3']
+    url4 = config['STOCK_TSLA']['URL4']
     jh_cnt = config['STOCK_TSLA']['JH']
     yn_cnt = config['STOCK_TSLA']['YN']
     yh_cnt = config['STOCK_TSLA']['YH']
@@ -696,21 +698,33 @@ def stock_check():
     total_cnt = int(jh_cnt) + int(yn_cnt) + int(yh_cnt) + int(yj_cnt) + int(sh_cnt)
 
     # KRW 환율 조회
-    driver.get(url2)
-    action = ActionChains(driver)
+    time.sleep(2)
+    try:
+        driver.set_page_load_timeout(10)  # Set page load timeout to 10 seconds
+        driver.get(url2)
+        action = ActionChains(driver)
+    except TimeoutException:
+        printL("naver 환율조회 TimeoutException")
+        pass
 
     time.sleep(2)
-
-    # time.sleep(10000)
     # usd_krw = driver.find_element(By.CLASS_NAME, "DetailInfo_price__InDYQ").text.replace("\nKRW", "").replace(",","")
     # 위의 구문은 CLASS_NAME 이 자꾸 바뀌는 문제로 아래문장으로 변경처리
     try:
         usd_krw = driver.find_element(By.CSS_SELECTOR, "[class^='DetailInfo_price__I']").text.replace("\nKRW", "").replace(",","")
-        # print(usd_krw)
+        printL(f"naver 환율 : {usd_krw}")
     except:
-        usd_krw = "1440.44"
-        # print("usd_krw fail")
-    print(usd_krw)
+        printL("usd_krw naver fail")
+        try:    # naver 환율조회 실패시 webull 에서 가져오도록 추가
+            driver.get(url4)
+            action = ActionChains(driver)
+            time.sleep(2)
+            usd_krw = driver.find_element(By.XPATH, '//*[@id="app"]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]').text.replace(",","")
+            printL(f"webull 환율 : {usd_krw}")
+        except:
+            printL("usd_krw webull fail")
+            usd_krw = "1390.00"
+    printL(f"환율 : {usd_krw}")
 
     # JH
     result_jh = int(int(jh_cnt) * float(tsla_value) * float(usd_krw))
@@ -779,25 +793,27 @@ def stock_check():
             # print(daily_chg)
             daily_chg_hwan = "{:.2f}".format(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
 
-            # DEBUG Start
-            printL(float(usd_krw))
-            printL(float(YESTER_USD_KRW))
-            printL(float(usd_krw) - float(YESTER_USD_KRW))
-            printL(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
-            printL(daily_chg_hwan)
+            # 환율 DEBUG Start
+            DEBUG = 0
+            if DEBUG:
+                printL(f"TODAY 환율 : {float(usd_krw)}")
+                printL(f"YESTER 환율 : {float(YESTER_USD_KRW)}")
+                printL(float(usd_krw) - float(YESTER_USD_KRW))
+                printL(((float(usd_krw) - float(YESTER_USD_KRW)) / float(YESTER_USD_KRW)) * 100)
+                printL(daily_chg_hwan)
             # DEBUG End
 
             if float(daily_chg_hwan) > 0:   # 일일 환율변동 %값이 양수면 + 붙여주기
                 daily_chg_hwan = f"+{daily_chg_hwan}%"
             else:
                 daily_chg_hwan = f"{daily_chg_hwan}%"
-            printL(daily_chg_hwan)
+            printL(f"DAILY 환율 변동 : {daily_chg_hwan}")
 
             if float(daily_chg.replace(",", "")) > 0:   # 일일변동금액 %값이 양수면 + 붙여주기
                 daily_chg = f"+{daily_chg}"
             else:
                 daily_chg = f"{daily_chg}"
-            printL(daily_chg)
+            printL(f"DAILY 변동 : {daily_chg}")
 
             data_list1 = [
                 (formatted_date, 'TSLA', 'JH', int(jh_cnt), float(usd_krw), result_jh),
