@@ -937,15 +937,6 @@ if flag:
     printL(msg_content)
     asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
 
-# ALIEXPRESS COIN 출석체크 실행 (로그인 DRAG에 막힘)
-flag = False    # False 유지
-if flag:
-    attendance = aliexpress()
-    # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
-    msg_content = f"[ALI] SMP 시세: \n - {attendance['smp_head']}\n - {attendance['smp_data']}\nREC 시세: \n - {attendance['rec']}\n - REC3 :{attendance['rec3']}개, {attendance['rec3_value']}원 \n - REC4 :{attendance['rec4']}개, {attendance['rec4_value']}원\n - Total : {attendance['rec_total']}원"
-    printL(msg_content)
-    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
-
 # 주가,수량,수익 일일체크
 flag = True
 if flag:
@@ -964,6 +955,17 @@ if flag:
         msg_content = f"\[[STOCK]({link3})] TSLA: [{attendance['tsla_value']} ({attendance['tsla_pct']})]({link1}) \nUSDKRW : [{attendance['usd_krw']} ({attendance['daily_chg_hwan']})]({link2}) \nJH : {attendance['jh_krw']} ({attendance['jh_cnt']}) \nYN : {attendance['yn_krw']} ({attendance['yn_cnt']}) \nYH : {attendance['yh_krw']} ({attendance['yh_cnt']}) \nYJ : {attendance['yj_krw']} ({attendance['yj_cnt']}) \nSH : {attendance['sh_krw']} ({attendance['sh_cnt']}) \nTOTAL : {attendance['total_krw']} ({attendance['total_cnt']}) \nDaily : {attendance['daily_chg']}"
         printL(msg_content)
         asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+
+#-------------------미사용 구간-------------------------#
+# ALIEXPRESS COIN 출석체크 실행 (로그인 DRAG에 막힘)
+flag = False    # False 유지
+if flag:
+    attendance = aliexpress()
+    # msg_content = f"[인벤] 횟수 : {attendance['count1']}->{attendance['count2']}, \n{attendance['txt']}"
+    msg_content = f"[ALI] SMP 시세: \n - {attendance['smp_head']}\n - {attendance['smp_data']}\nREC 시세: \n - {attendance['rec']}\n - REC3 :{attendance['rec3']}개, {attendance['rec3_value']}원 \n - REC4 :{attendance['rec4']}개, {attendance['rec4_value']}원\n - Total : {attendance['rec_total']}원"
+    printL(msg_content)
+    asyncio.run(tele_push(msg_content)) #텔레그램 발송 (asyncio를 이용해야 함)
+#-------------------------------------------------------#
 
 if global_var == 0:	# 전체적으로 보낼 메세지가 1건도 없을때
 	msg_content = " - att_auto : 메세지가 없음"
