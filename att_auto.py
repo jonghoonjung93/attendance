@@ -658,6 +658,8 @@ def stock_check():
     # 아래 옵션 두줄 추가(NAS docker 에서 실행시 필요, memory 부족해서)
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
+
+    printL("-- 운영모드 체크 완료")
     
     # config.json 파일처리 ----------------
     with open('config.json','r') as f:
@@ -666,12 +668,14 @@ def stock_check():
     url2 = config['STOCK_TSLA']['URL2']
     url3 = config['STOCK_TSLA']['URL3']
     url4 = config['STOCK_TSLA']['URL4']
+    url5 = config['STOCK_TSLA']['URL5']
     jh_cnt = config['STOCK_TSLA']['JH']
     yn_cnt = config['STOCK_TSLA']['YN']
     yh_cnt = config['STOCK_TSLA']['YH']
     yj_cnt = config['STOCK_TSLA']['YJ']
     sh_cnt = config['STOCK_TSLA']['SH']
     # ------------------------------------
+    printL("-- stock check config.json 파일처리 완료")
     # print(url1)
     # print(jh_cnt)
     # print(yn_cnt)
@@ -680,17 +684,58 @@ def stock_check():
     # print(sh_cnt)
     driver = webdriver.Chrome(options=options)
 
-    # 네이버 주식 TSLA 주가 조회
-    driver.get(url1)
-    #driver.maximize_window()
-    action = ActionChains(driver)
+    # yahoo finance TSLA 주가 조회 (%가 제대로 안나오는 문제)
+    flag = False
+    if flag:
+        printL("-- yahoo finance TSLA 주가 조회 start")
+        import yfinance as yf
+        # TSLA 티커 객체 생성
+        stock_info = yf.Ticker('TSLA').info
+        # 현재 시장 가격 출력
+        tsla_value = stock_info['regularMarketPrice']
+        printL(f"TSLA 현재 가격 (yahoo)):, {tsla_value}")
+        # 전일 대비 변동률(%) 출력
+        tsla_pct = stock_info['regularMarketChangePercent']
+        printL(f"TSLA 전일 대비 변동률 (yahoo)  : {tsla_pct}")
+        # 가격은 잘 나오는데 %는 webull 과 약간 다르게 나오는 문제
+        printL("-- yahoo finance TSLA 주가 조회 end")
 
-    time.sleep(2)
+    # 네이버 주식 TSLA 주가 조회 (운영에서만 element 에러가 나는 문제)
+    flag = False
+    if flag:
+        printL("-- naver 주식 TSLA 주가 조회 start")
+        driver.get(url1)
+        #driver.maximize_window()
+        action = ActionChains(driver)
 
-    tsla_value = driver.find_element(By.CLASS_NAME, "GraphMain_price__H72B2").text.replace("\nUSD", "")
-    tsla_pct = driver.find_elements(By.CLASS_NAME, "VGap_gap__LQYpL")[1].text
-    # print(tsla_value)
-    # print(tsla_pct)
+        time.sleep(2)
+
+        # time.sleep(10000)
+        # 아래줄은 온라인에서 자꾸 element 못찾는 에러남
+        # tsla_value = driver.find_element(By.CLASS_NAME, "GraphMain_price__H72B2").text.replace("\nUSD", "")
+        tsla_pct = driver.find_elements(By.CLASS_NAME, "VGap_gap__LQYpL")[1].text
+        printL("-- naver 주식 TSLA 주가 조회 end")
+    
+    # webull 에서 TSLA 주가 조회
+    flag = True
+    if flag:
+        printL("-- webull TSLA 주가 조회 start")
+        driver.get(url5)
+        #driver.maximize_window()
+        action = ActionChains(driver)
+
+        time.sleep(2)
+
+        # time.sleep(10000)
+        # 아래줄은 온라인에서 자꾸 element 못찾는 에러남
+        tsla_value = driver.find_element(By.CLASS_NAME, "csr116.csr113").text
+        tsla_pct = driver.find_element(By.XPATH, "/html/body/div[1]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]").text
+        printL("-- webull TSLA 주가 조회 end")
+
+    printL(tsla_value)
+    printL(tsla_pct)
+    # time.sleep(10000)
+        
 
     # time.sleep(2)
 
@@ -698,6 +743,7 @@ def stock_check():
     total_cnt = int(jh_cnt) + int(yn_cnt) + int(yh_cnt) + int(yj_cnt) + int(sh_cnt)
 
     # KRW 환율 조회
+    printL("-- naver 환율조회 start")
     time.sleep(2)
     try:
         driver.set_page_load_timeout(10)  # Set page load timeout to 10 seconds
@@ -756,6 +802,8 @@ def stock_check():
     total_krw = format(result_total, ',')
 
     driver.quit()
+
+    printL("-- db 저장 start")
 
     # STOCK History DB 저장기능
     flag = True
@@ -851,6 +899,7 @@ def stock_check():
         'daily_chg' : daily_chg,
         'daily_chg_hwan' : daily_chg_hwan
     }
+    printL("-- 처리완료. return")
     return(result_stock)
 
 global_var = 0
