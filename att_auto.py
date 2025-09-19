@@ -727,8 +727,8 @@ def stock_check():
         time.sleep(2)
 
         # time.sleep(10000)
-        # 아래줄은 온라인에서 자꾸 element 못찾는 에러남
-        tsla_value = driver.find_element(By.CLASS_NAME, "csr116.csr113").text
+        # 아래줄은 온라인에서 자꾸 element 못찾는 에러남,classname이 바뀜. XPATH로 변경
+        tsla_value = driver.find_element(By.XPATH, "/html/body/div[1]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[1]/div[1]").text
         tsla_pct = driver.find_element(By.XPATH, "/html/body/div[1]/section/div[1]/div/div[2]/div[1]/div[2]/div[2]/div[1]/div[2]/div[2]").text
         printL("-- webull TSLA 주가 조회 end")
 
