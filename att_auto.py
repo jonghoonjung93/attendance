@@ -210,7 +210,7 @@ def subs():
     # print(url2)
     driver = webdriver.Chrome(options=options)
     
-    # SUBS 초화면 진입 (timeout 에 대비한 재시도 처리, 아직 검증안됐음)
+    # SUBS 초화면 진입 (timeout 에 대비한 재시도 처리, 실패시 에러처리)
     max_retries = 3
     for attempt in range(max_retries):
         try:
@@ -227,7 +227,7 @@ def subs():
             if attempt == 2:    #3회 재시도후 실패시
                 result_subs = {
                     'count1': 0,
-                    'txt': "ERROR"   # 에러종료처리
+                    'txt': f"ERROR : [[SUBS]({url1})] 수동처리 필요"   # 에러종료처리
                 }
                 return(result_subs)
 
@@ -930,7 +930,7 @@ async def tele_push(content): #텔레그램 발송용 함수
         send_retry = 0
         while True:	# 텔레그램 발송이 혹시 실패하면 최대 3회까지 성공할때까지 재시도
             try:
-                if "STOCK" in content:  # STOCK 의 경우에만 Markdown 을 사용함
+                if "STOCK" in content or "ERROR" in content:  # STOCK,ERROR 의 경우에만 Markdown 을 사용함
                     await bot.send_message(chat_id, formatted_time + "\n" + content, parse_mode = 'Markdown', disable_web_page_preview=True)
                 else:
                     await bot.send_message(chat_id, formatted_time + "\n" + content)
@@ -972,7 +972,12 @@ if flag:
 flag = True
 if flag:
     attendance = subs()
-    if attendance['txt'] != "ERROR":
+    # if attendance['txt'] != "ERROR":
+    if "ERROR" in attendance['txt']:    # 에러났을때
+        msg_content2 = f"[SUBS] : {attendance['txt']}"
+        printL(msg_content2)
+        asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
+    else:   # 정상일때
         msg_content2 = f"[SUBS] : {attendance['count1']},\n {attendance['txt']}"
         printL(msg_content2)
         asyncio.run(tele_push(msg_content2)) #텔레그램 발송 (asyncio를 이용해야 함)
