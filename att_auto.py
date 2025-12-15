@@ -829,13 +829,17 @@ def stock_check():
             query1 = f'SELECT max(date), total_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
             # 어제자(또는 가장 최근일) 환율 조회
             query2 = f'SELECT max(date), usd_krw from stock_history where user = "TOTAL" and date != "{formatted_date}"'
+            # ATH 금액조회
+            query3 = f'SELECT MAX(total_krw) FROM stock_history WHERE user = "TOTAL"'
             try:
                 YESTER_TOTAL_KRW = query_database(query1)[0][1]
                 # print(result_total, YESTER_TOTAL_KRW)
                 YESTER_USD_KRW = query_database(query2)[0][1]
+                ATH_TOTAL_KRW = query_database(query3)[0][0]
             except:
                 YESTER_TOTAL_KRW = 0
                 YESTER_USD_KRW = 0
+                ATH_TOTAL_KRW = 0
 
             daily_chg = format(result_total - int(YESTER_TOTAL_KRW), ',')
             # print(daily_chg)
@@ -876,6 +880,13 @@ def stock_check():
             conn.commit()
         finally:
             conn.close()
+        
+        #-------- ATH Check ------------
+        ath_total_int = int(ATH_TOTAL_KRW)  # 기존 ATH 금액
+        # printL(f"ath_total_int : {ath_total_int}")
+        # printL(f"result_total : {result_total}")
+        if result_total >= ath_total_int:   # 현재 TOTAL 금액이 ATH 금액보다 크면 ATH로 표시
+            total_krw = total_krw + " (ATH)"
 
     result_stock = {
         'url1' : url1,
