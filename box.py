@@ -4,10 +4,24 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 import time
 import json
+import os
+
+def get_chrome_driver(options):
+    driver_path = ChromeDriverManager().install()
+    if "THIRD_PARTY_NOTICES" in driver_path:
+        driver_path = os.path.join(os.path.dirname(driver_path), "chromedriver")
+    
+    try:
+        os.chmod(driver_path, 0o755)
+    except:
+        pass
+        
+    return webdriver.Chrome(service=Service(driver_path), options=options)
 
 root = Tk()
 root.title("출첵")
@@ -34,7 +48,7 @@ def inven():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
     
     # 인벤 초화면 진입
     driver.get(url1)
@@ -154,9 +168,9 @@ def avsubs():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
-
-    # AVSUBS 초화면 진입
+    driver = get_chrome_driver(options)
+    
+    # SUBS 초화면 진입 (timeout 에 대비한 재시도 처리, 실패시 에러처리)
     driver.get(url1)
     #driver.maximize_window()
     action = ActionChains(driver)
@@ -229,7 +243,7 @@ def emart():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
 
     # 이마트 로그인 화면 진입
     driver.get(url1)

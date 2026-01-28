@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
@@ -32,6 +33,18 @@ for nav in navs:
 driver.get(url)
 html = driver.page_source   # 이후 Beautifulsoup을 이용해서 속도를 빠르게
 """
+
+def get_chrome_driver(options):
+    driver_path = ChromeDriverManager().install()
+    if "THIRD_PARTY_NOTICES" in driver_path:
+        driver_path = os.path.join(os.path.dirname(driver_path), "chromedriver")
+    
+    try:
+        os.chmod(driver_path, 0o755)
+    except:
+        pass
+        
+    return webdriver.Chrome(service=Service(driver_path), options=options)
 
 def mode_check():
 	hostname = socket.gethostname()
@@ -81,7 +94,7 @@ def inven():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
     
     # 인벤 초화면 진입
     driver.get(url1)
@@ -208,7 +221,7 @@ def subs():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
     
     # SUBS 초화면 진입 (timeout 에 대비한 재시도 처리, 실패시 에러처리)
     max_retries = 3
@@ -522,7 +535,7 @@ def solar():
     # print(password)
     # print(url1)
     # print(url2)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
     
     # 전력거래소 사이트 SMP 조회화면 진입
     driver.get(url1)
@@ -624,7 +637,7 @@ def aliexpress():
     print(user_id)
     print(password)
     print(url1)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
 
     # aliexpress coin 화면 진입
     driver.get(url1)
@@ -682,7 +695,7 @@ def stock_check():
     # print(yh_cnt)
     # print(yj_cnt)
     # print(sh_cnt)
-    driver = webdriver.Chrome(options=options)
+    driver = get_chrome_driver(options)
 
     # yahoo finance TSLA 주가 조회 (%가 제대로 안나오는 문제)
     flag = False
