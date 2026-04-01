@@ -255,41 +255,54 @@ def subs():
     # ID/Passwd 입력하고 로그인 버튼 클릭
     driver.find_element(By.XPATH, '//*[@id="mb_id"]').send_keys(user_id)
     driver.find_element(By.XPATH, '//*[@id="mb_password"]').send_keys(password)
-    driver.find_element(By.CLASS_NAME, 'attend-me').click() # 자동출석 체크 제거 (수동출석 하기 위해)
+    
+    # ------ 자동출석 하기위해 이 부분 임시 제거 (출첵 페이지 봇검사중) -------
+    # driver.find_element(By.CLASS_NAME, 'attend-me').click() # 자동출석 체크 제거 (수동출석 하기 위해)
+    # ------------------------------------------------------------
+    
     driver.find_element(By.CLASS_NAME, "btn.btn-navy.btn-block").click()
-    # time.sleep(10)  # 로그인 누르고 10초 대기
-    time.sleep(1)  # 로그인 누르고 10초 대기
+
+    time.sleep(10)  # 로그인 누르고 10초 대기
+    # time.sleep(1)  # 로그인 누르고 10초 대기
 
     # --------- 출첵 기능 --------
-    printL(f"출첵 시작... {url2}")
-    driver.get(url2)
-    time.sleep(10)
-    # time.sleep(1)
+    flag = False
+    if flag:    # 시작시간 처리
+        printL(f"출첵 시작... {url2}")
+        driver.get(url2)
+        time.sleep(10)
+        # time.sleep(1)
 
-    # 출첵 버튼 누르기
-    driver.find_element(By.CLASS_NAME, 'btn.btn-color.btn-lg').click()
-    try:
-        time.sleep(5)
-        result = driver.switch_to.alert
-        time.sleep(2)
-        printL(f"result.txt = {result.text}")
-        result_txt = result.text
+        # 출첵 버튼 누르기
+        driver.find_element(By.CLASS_NAME, 'btn.btn-color.btn-lg').click()
+        try:
+            time.sleep(5)
+            result = driver.switch_to.alert
+            time.sleep(2)
+            printL(f"result.txt = {result.text}")
+            result_txt = result.text
 
-        # alert 창 확인
-        result.accept()
+            # alert 창 확인
+            result.accept()
 
-        # alert 창 끄기
-        # result.dismiss()
-    except Exception as err:    # 이미 출석했을때는 alert이 뜨는데, 출첵성공때는 안뜬다. 그래서 출첵성공시 여기로...
-        result_txt = "출첵 성공"
-        printL(f"{result_txt}")
-    
-    # 오늘 출석일, 연속일자 Count 표시
-    att_count1 = driver.find_element(By.CLASS_NAME, 'pull-left.hidden-xs').text
+            # alert 창 끄기
+            # result.dismiss()
+        except Exception as err:    # 이미 출석했을때는 alert이 뜨는데, 출첵성공때는 안뜬다. 그래서 출첵성공시 여기로...
+            result_txt = "출첵 성공"
+            printL(f"{result_txt}")
+        
+        # 오늘 출석일, 연속일자 Count 표시
+        att_count1 = driver.find_element(By.CLASS_NAME, 'pull-left.hidden-xs').text
+    # 가상 출석일 처리
+    result_txt = "출첵 확인불가"
+    att_count1 = "?"
 
     # 사이드바에서 레벨,Exp,MP 가져오기
-    driver.find_element(By.XPATH, '/html/body/div[1]/aside/div/div[1]/ul/li[1]/a/b').click()
-    time.sleep(1)
+    # 출첵 빼면서 사이드바 나오는 버튼 수정
+    # driver.find_element(By.XPATH, '/html/body/div[1]/aside/div/div[1]/ul/li[1]/a/b').click()
+    driver.find_element(By.XPATH, '/html/body/div[2]/aside/div/div[1]/ul/li[1]/a/b').click()
+    time.sleep(2)
+    
     level = driver.find_element(By.XPATH, '//*[@id="sidebar-user"]/div[1]/div[3]').text
     mp = driver.find_element(By.XPATH, '//*[@id="sidebar-user"]/div[1]/div[6]/ul/li[1]/a/span').text
     level = level.replace("\r", "").replace("\n", " ")  # 변수중간에 엔터값 지우기
