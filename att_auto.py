@@ -266,11 +266,12 @@ def subs():
     # time.sleep(1)  # 로그인 누르고 10초 대기
 
     # --------- 출첵 기능 --------
-    flag = False
-    if flag:    # 시작시간 처리
+    # flag = False
+    # if flag:
+    try:
         printL(f"출첵 시작... {url2}")
         driver.get(url2)
-        time.sleep(10)
+        time.sleep(5)
         # time.sleep(1)
 
         # 출첵 버튼 누르기
@@ -293,14 +294,17 @@ def subs():
         
         # 오늘 출석일, 연속일자 Count 표시
         att_count1 = driver.find_element(By.CLASS_NAME, 'pull-left.hidden-xs').text
-    # 가상 출석일 처리
-    result_txt = "출첵 확인불가"
-    att_count1 = "?"
+    except:
+        # 출석 실패 처리
+        result_txt = "출첵 확인불가"
+        att_count1 = "?"
 
     # 사이드바에서 레벨,Exp,MP 가져오기
     # 출첵 빼면서 사이드바 나오는 버튼 수정
-    # driver.find_element(By.XPATH, '/html/body/div[1]/aside/div/div[1]/ul/li[1]/a/b').click()
-    driver.find_element(By.XPATH, '/html/body/div[2]/aside/div/div[1]/ul/li[1]/a/b').click()
+    try:
+        driver.find_element(By.XPATH, '/html/body/div[1]/aside/div/div[1]/ul/li[1]/a/b').click()
+    except:
+        driver.find_element(By.XPATH, '/html/body/div[2]/aside/div/div[1]/ul/li[1]/a/b').click()
     time.sleep(2)
     
     level = driver.find_element(By.XPATH, '//*[@id="sidebar-user"]/div[1]/div[3]').text
