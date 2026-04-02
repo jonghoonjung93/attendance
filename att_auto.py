@@ -266,16 +266,21 @@ def subs():
     # time.sleep(1)  # 로그인 누르고 10초 대기
 
     # --------- 출첵 기능 --------
-    # flag = False
-    # if flag:
-    try:
+    flag = True
+    if flag:
         printL(f"출첵 시작... {url2}")
         driver.get(url2)
+        printL(f"출첵 page 접속 명령성공... {url2}")
         time.sleep(5)
         # time.sleep(1)
 
         # 출첵 버튼 누르기
-        driver.find_element(By.CLASS_NAME, 'btn.btn-color.btn-lg').click()
+        try:
+            driver.find_element(By.CLASS_NAME, 'btn.btn-color.btn-lg').click()
+            printL(f"출첵 버튼 누르기 성공")
+            result_txt = "출첵 성공"
+        except:
+            printL(f"출첵 버튼 누르기 실패")
         try:
             time.sleep(5)
             result = driver.switch_to.alert
@@ -288,23 +293,28 @@ def subs():
 
             # alert 창 끄기
             # result.dismiss()
-        except Exception as err:    # 이미 출석했을때는 alert이 뜨는데, 출첵성공때는 안뜬다. 그래서 출첵성공시 여기로...
-            result_txt = "출첵 성공"
+        except Exception as err:
+            result_txt = "출첵 성공 알수없음"
             printL(f"{result_txt}")
         
         # 오늘 출석일, 연속일자 Count 표시
-        att_count1 = driver.find_element(By.CLASS_NAME, 'pull-left.hidden-xs').text
-    except:
-        # 출석 실패 처리
-        result_txt = "출첵 확인불가"
-        att_count1 = "?"
+        try:
+            att_count1 = driver.find_element(By.CLASS_NAME, 'pull-left.hidden-xs').text
+        except:
+            printL(f"출첵 실패")
+            result_txt = "출첵 확인불가"
+            att_count1 = "???"
+            driver.get(url1)
+            time.sleep(3)
 
     # 사이드바에서 레벨,Exp,MP 가져오기
     # 출첵 빼면서 사이드바 나오는 버튼 수정
     try:
         driver.find_element(By.XPATH, '/html/body/div[1]/aside/div/div[1]/ul/li[1]/a/b').click()
+        printL(f"사이드바 열기 첫번째 클릭 성공")
     except:
         driver.find_element(By.XPATH, '/html/body/div[2]/aside/div/div[1]/ul/li[1]/a/b').click()
+        printL(f"사이드바 열기 두번째 클릭 성공")
     time.sleep(2)
     
     level = driver.find_element(By.XPATH, '//*[@id="sidebar-user"]/div[1]/div[3]').text
