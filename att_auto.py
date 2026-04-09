@@ -103,7 +103,7 @@ def inven():
 
     time.sleep(1)
     # 로그인 버튼 클릭
-    driver.find_element(By.CLASS_NAME, "login-btn").click()
+    driver.find_element(By.CLASS_NAME, "btn-login").click()
     time.sleep(1)
     # ID/Passwd 입력하고 로그인 버튼 클릭
     driver.find_element(By.ID, "user_id").send_keys(user_id)
