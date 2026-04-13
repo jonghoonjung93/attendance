@@ -585,8 +585,14 @@ def solar():
     
     # print(repr(smp_head)) #문자열안에 특수문자까지 다 볼때
     # print(smp_head)
-    # print(smp_data)
-
+    printL(f'smp_data = {smp_data}')
+    # Extract the last field from smp_data string
+    today_smp = smp_data.split()[-1]
+    printL(f'today_smp = {today_smp}')
+    # Save today_smp value to a file
+    with open('today_smp.txt', 'w') as f:
+        f.write(today_smp)
+    
     time.sleep(2)
     driver.get(url2)
     action = ActionChains(driver)
