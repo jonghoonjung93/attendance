@@ -597,7 +597,7 @@ def solar():
     driver.get(url2)
     action = ActionChains(driver)
 
-    time.sleep(1)
+    time.sleep(2)
     rec_data = driver.find_element(By.ID, 'tab-1').text
     rec = rec_data.replace('\n',' ')
 
@@ -611,7 +611,7 @@ def solar():
         return words[-1] if words else ""
     
     rec_avg = get_last_word(rec)
-    # print(f'rec_avg = {rec_avg}')
+    # printL(f'rec_avg = {rec_avg}')
 
     # print(type(rec3))
     # print(type(rec_avg))
@@ -629,7 +629,9 @@ def solar():
     # print(f'rec3 = {rec3}개, {rec3_value_comma}원')
     # print(f'rec4 = {rec4}개, {rec4_value_comma}원')
 
-    # time.sleep(10000)
+    # Save rec_avg_cleaned value to a file
+    with open('today_rec.txt', 'w') as f:
+        f.write(rec_avg_cleaned)
 
     driver.quit()
 
